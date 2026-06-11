@@ -1,69 +1,262 @@
+```html
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Trigger Google Script</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f8f9fa;
-    }
-    button {
-      padding: 15px 30px;
-      font-size: 16px;
-      font-weight: bold;
-      background-color: #0F9D58;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      transition: background-color 0.2s;
-    }
-    button:hover { 
-      background-color: #0b8043; 
-    }
-    #status {
-      margin-top: 20px;
-      font-size: 14px;
-      color: #555;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Script Trigger</title>
+    
+    <!-- Meta tags for mobile and PWA -->
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Trigger">
+    
+    <!-- Placeholder for dynamic manifest -->
+    <link id="manifest-link" rel="manifest" href="">
+
+    <!-- Tailwind CSS for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* Custom animations and utilities */
+        body {
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gradient-bg {
+            background: radial-gradient(circle at top right, #3b82f6 0%, transparent 40%),
+                        radial-gradient(circle at bottom left, #10b981 0%, transparent 40%);
+            background-color: #0f172a;
+        }
+
+        /* Smooth ripple effect for the button */
+        .btn-press:active {
+            transform: scale(0.96);
+        }
+
+        /* Spinner animation */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-fast {
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Toast animation */
+        .toast-enter {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        .toast-enter-active {
+            transform: translateY(0);
+            opacity: 1;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .toast-exit {
+            transform: translateY(100%);
+            opacity: 0;
+            transition: all 0.3s ease-in;
+        }
+    </style>
 </head>
-<body>
+<body class="gradient-bg min-h-screen text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
 
-  <button id="runScriptBtn">Execute Script</button>
-  <p id="status"></p>
+    <!-- Decorative background elements -->
+    <div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-[80px] opacity-40 animate-pulse"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-64 h-64 bg-emerald-500 rounded-full mix-blend-multiply filter blur-[80px] opacity-40 animate-pulse" style="animation-delay: 2s;"></div>
 
-  <script>
-    // Your exact Web App URL
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzA9fIw6IQgGH9OuWDYIUpprTGs36-PxiBtgTF_OCL3DK3RAVX0w9OcFOVordtpiOI/exec"; 
+    <!-- Main App Container -->
+    <main class="glass-card w-full max-w-sm rounded-3xl p-8 flex flex-col items-center shadow-2xl relative z-10 transition-all duration-300">
+        
+        <!-- Icon/Header -->
+        <div class="w-20 h-20 bg-gradient-to-tr from-emerald-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg mb-6 shadow-emerald-500/30">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+            </svg>
+        </div>
 
-    document.getElementById("runScriptBtn").addEventListener("click", function() {
-      const statusText = document.getElementById("status");
-      statusText.innerText = "Running...";
+        <h1 class="text-2xl font-bold tracking-tight mb-2">Automations</h1>
+        <p class="text-slate-400 text-center text-sm mb-10 leading-relaxed">
+            Tap the button below to execute your Google Apps Script instantly.
+        </p>
 
-      // Send the POST request to trigger the Google Apps Script
-      fetch(WEB_APP_URL, {
-        method: "POST",
-        mode: "no-cors" // Required to prevent browser CORS blocking
-      })
-      .then(() => {
-        // Because of 'no-cors', we can't read the exact response from Google,
-        // but if we reach here, the network request was successfully sent.
-        statusText.innerText = "Command sent successfully! Check your Apps Script execution logs.";
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        statusText.innerText = "Error sending command.";
-      });
-    });
-  </script>
+        <!-- The Main Execution Button -->
+        <button id="triggerBtn" class="btn-press relative w-full h-16 bg-white text-slate-900 rounded-2xl font-bold text-lg shadow-[0_0_40px_rgba(255,255,255,0.3)] flex items-center justify-center overflow-hidden transition-all duration-200 hover:bg-slate-50">
+            <span id="btnText" class="flex items-center gap-2">
+                Execute Script
+            </span>
+            <span id="btnLoader" class="hidden absolute inset-0 flex items-center justify-center bg-white">
+                <svg class="animate-spin-fast h-6 w-6 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </span>
+        </button>
 
+        <!-- PWA Install Button (Hidden by default, shows if device supports installation) -->
+        <button id="installPwaBtn" class="hidden mt-6 text-sm text-emerald-400 font-medium flex items-center gap-1 hover:text-emerald-300 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Install App to Home Screen
+        </button>
+
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="toast-enter fixed bottom-8 left-1/2 -translate-x-1/2 glass-card px-6 py-3 rounded-full flex items-center gap-3 shadow-xl z-50 pointer-events-none">
+        <div id="toastIcon" class="w-6 h-6 rounded-full flex items-center justify-center text-white"></div>
+        <span id="toastMessage" class="text-sm font-medium text-white"></span>
+    </div>
+
+    <script>
+        // --- 1. CONFIGURATION ---
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzA9fIw6IQgGH9OuWDYIUpprTGs36-PxiBtgTF_OCL3DK3RAVX0w9OcFOVordtpiOI/exec";
+
+        // --- 2. UI ELEMENTS ---
+        const triggerBtn = document.getElementById('triggerBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoader = document.getElementById('btnLoader');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        const toastIcon = document.getElementById('toastIcon');
+        
+        let isExecuting = false;
+
+        // --- 3. EXECUTION LOGIC ---
+        triggerBtn.addEventListener('click', async () => {
+            if (isExecuting) return;
+            
+            // Set loading state
+            isExecuting = true;
+            btnText.classList.add('opacity-0');
+            btnLoader.classList.remove('hidden');
+            triggerBtn.classList.add('scale-95');
+
+            try {
+                // Send command
+                await fetch(WEB_APP_URL, {
+                    method: "POST",
+                    mode: "no-cors" // Required for Google Scripts
+                });
+                
+                // Simulate slight delay for UX (since no-cors resolves almost instantly)
+                await new Promise(r => setTimeout(r, 800));
+                
+                showToast('Script executed successfully!', 'success');
+            } catch (error) {
+                console.error("Error:", error);
+                showToast('Failed to connect to script.', 'error');
+            } finally {
+                // Reset loading state
+                isExecuting = false;
+                btnText.classList.remove('opacity-0');
+                btnLoader.classList.add('hidden');
+                triggerBtn.classList.remove('scale-95');
+            }
+        });
+
+        // --- 4. TOAST NOTIFICATION LOGIC ---
+        let toastTimeout;
+        function showToast(message, type) {
+            clearTimeout(toastTimeout);
+            
+            toastMessage.textContent = message;
+            
+            if (type === 'success') {
+                toastIcon.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                toastIcon.className = 'w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white';
+            } else {
+                toastIcon.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+                toastIcon.className = 'w-6 h-6 rounded-full flex items-center justify-center bg-red-500 text-white';
+            }
+
+            toast.classList.remove('toast-enter', 'toast-exit');
+            toast.classList.add('toast-enter-active');
+
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('toast-enter-active');
+                toast.classList.add('toast-exit');
+            }, 3000);
+        }
+
+        // --- 5. DYNAMIC PWA GENERATION (Single-file magic) ---
+        
+        // A. Generate SVG App Icon dynamically
+        const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><rect width="512" height="512" rx="112" fill="#0f172a"/><path d="M256 96L128 352h256L256 96z" fill="#10b981"/><path d="M256 416L128 352h256L256 416z" fill="#3b82f6"/></svg>`;
+        const iconUrl = 'data:image/svg+xml;base64,' + btoa(svgIcon);
+
+        // B. Inject Manifest dynamically
+        const manifest = {
+            name: "Script Trigger",
+            short_name: "Trigger",
+            description: "A fast way to execute Google Apps Script",
+            start_url: window.location.href,
+            display: "standalone",
+            background_color: "#0f172a",
+            theme_color: "#0f172a",
+            icons: [{ src: iconUrl, sizes: "512x512", type: "image/svg+xml" }]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+        document.getElementById('manifest-link').href = URL.createObjectURL(manifestBlob);
+
+        // C. Generate and Register Service Worker dynamically
+        const swCode = `
+            const CACHE_NAME = 'trigger-v1';
+            self.addEventListener('install', (e) => { self.skipWaiting(); });
+            self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); });
+            self.addEventListener('fetch', (e) => {
+                // Minimal fetch listener to ensure PWA installability criteria is met
+                e.respondWith(fetch(e.request).catch(() => new Response("Offline")));
+            });
+        `;
+        const swBlob = new Blob([swCode], { type: 'application/javascript' });
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register(URL.createObjectURL(swBlob))
+                .catch(err => console.log('PWA SW registration failed:', err));
+        }
+
+        // --- 6. PWA INSTALL PROMPT LOGIC ---
+        let deferredPrompt;
+        const installPwaBtn = document.getElementById('installPwaBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Update UI to notify the user they can add to home screen
+            installPwaBtn.classList.remove('hidden');
+        });
+
+        installPwaBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    installPwaBtn.classList.add('hidden');
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        // Hide install button if already running as standalone app
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            installPwaBtn.classList.add('hidden');
+        }
+    </script>
 </body>
 </html>
+
+```
