@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Trigger Google Script</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f8f9fa;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 16px;
+      font-weight: bold;
+      background-color: #0F9D58;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: background-color 0.2s;
+    }
+    button:hover { 
+      background-color: #0b8043; 
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <button id="runScriptBtn">Execute Script</button>
+  <p id="status"></p>
+
+  <script>
+    // Your exact Web App URL
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzA9fIw6IQgGH9OuWDYIUpprTGs36-PxiBtgTF_OCL3DK3RAVX0w9OcFOVordtpiOI/exec"; 
+
+    document.getElementById("runScriptBtn").addEventListener("click", function() {
+      const statusText = document.getElementById("status");
+      statusText.innerText = "Running...";
+
+      // Send the POST request to trigger the Google Apps Script
+      fetch(WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors" // Required to prevent browser CORS blocking
+      })
+      .then(() => {
+        // Because of 'no-cors', we can't read the exact response from Google,
+        // but if we reach here, the network request was successfully sent.
+        statusText.innerText = "Command sent successfully! Check your Apps Script execution logs.";
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        statusText.innerText = "Error sending command.";
+      });
+    });
+  </script>
+
+</body>
+</html>
